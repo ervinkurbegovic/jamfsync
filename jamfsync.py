@@ -37,7 +37,7 @@ class Jamfapi:
     Provides a method, `get_jamf_data`, to fetch and store API data in accessible variables.
 
     API credentials can be found in Jamf settings:
-        - API endpoint: Settings > API > API Identity.ms.de
+        - API endpoint: Settings > API > ...
         - Username: Devices > Enroll Devices > MDM Server URL ...network=****...
     """
 
