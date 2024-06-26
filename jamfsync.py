@@ -114,55 +114,59 @@ class Jamfapi:
             jamf_users
             print('Jamfusers:',len(jamf_users),'\nIserv Jamfusers:', len(iserv_jamf_users))
             input()
+            add_users = []
             for counter, (index, data) in enumerate(iserv_jamf_users.iterrows()):
                 # Test User-Update
                 user_id = data['id']
                 jamf_data = jamf_users.loc[jamf_users['id']==user_id]
-                current_jamf_username = jamf_data['username'].values[-1] # Probably not needed as username and email are the same!
-                current_jamf_email = jamf_data['email'].values[-1]
-                current_jamf_firstName = jamf_data['firstName'].values[-1]
-                current_jamf_lastName = jamf_data['lastName'].values[-1]
-                current_jamf_locationId = str(jamf_data['locationId'].values[-1])
+                if jamf_data.empty:
+                    add_users.append(user_id)
+                else:
+                    current_jamf_username = jamf_data['username'].values[-1] # Probably not needed as username and email are the same!
+                    current_jamf_email = jamf_data['email'].values[-1]
+                    current_jamf_firstName = jamf_data['firstName'].values[-1]
+                    current_jamf_lastName = jamf_data['lastName'].values[-1]
+                    current_jamf_locationId = str(jamf_data['locationId'].values[-1])
 
-                current_iserv_username = data['username']
-                current_iserv_email = data['email']
-                current_iserv_firstName = data['firstName']
-                current_iserv_lastName = data['lastName']
-                current_iserv_locationId = str(data['locationId'])
+                    current_iserv_username = data['username']
+                    current_iserv_email = data['email']
+                    current_iserv_firstName = data['firstName']
+                    current_iserv_lastName = data['lastName']
+                    current_iserv_locationId = str(data['locationId'])
 
-                if current_jamf_email != current_iserv_email or \
-                    current_jamf_locationId != current_iserv_locationId or \
-                    current_jamf_username != current_iserv_username or \
-                    current_jamf_firstName != current_iserv_firstName or \
-                    current_jamf_lastName != current_iserv_lastName:
-                    print('Incorrect:\n', [current_jamf_email == current_iserv_email, 
-                                           current_jamf_locationId == current_iserv_locationId, 
-                                           current_jamf_username == current_iserv_username,
-                                           current_jamf_firstName == current_iserv_firstName, 
-                                           current_jamf_lastName == current_iserv_lastName],
-                          '\n\nJamf:\t'+current_jamf_email,len(current_jamf_email), '\nIServ:\t'+current_iserv_email,len(current_iserv_email),
-                          '\n\nJamf:\t'+current_jamf_locationId,len(current_jamf_locationId), '\nIServ:\t'+current_iserv_locationId,len(current_iserv_locationId),
-                          '\n\nJamf:\t'+current_jamf_username,len(current_jamf_username), '\nIServ:\t'+current_iserv_username,len(current_iserv_username),
-                          '\n\nJamf:\t'+current_jamf_firstName,len(current_jamf_firstName), '\nIServ:\t'+current_iserv_firstName,len(current_iserv_firstName), 
-                          '\n\nJamf:\t'+current_jamf_lastName,len(current_jamf_lastName),'\nIServ:\t'+current_iserv_lastName,len(current_iserv_lastName),'\n')
-                    url = self.endpoints['users'][0]+'/'+str(user_id)
-                    data = {
-                       "username": current_iserv_username, 
-                       "password": "",
-                       "email": current_iserv_email,
-                       "firstName": current_iserv_firstName,
-                       "lastName": current_iserv_lastName,
-                       "memberOf": [],
-                       "locationId": current_iserv_locationId
-                    }
-                    response = session.put(url, headers=self.headers, json=data, auth=(self.username, self.password))
-                    if response.status_code == 200:
-                        print('***'*35)
-                        print(f"{yellow}{user_id},{data['username']} reviewed and corrected - Progress {counter+1} of {len(iserv_jamf_users)}"+color_end)
-                        print('***'*35)
-                    else:
-                        print(f"Error reviewing user {user_id},{data['username']}: {response.status_code} - {response.text}")
-            input('End')
+                    if current_jamf_email != current_iserv_email or \
+                        current_jamf_locationId != current_iserv_locationId or \
+                        current_jamf_username != current_iserv_username or \
+                        current_jamf_firstName != current_iserv_firstName or \
+                        current_jamf_lastName != current_iserv_lastName:
+                        print('Incorrect:\n', [current_jamf_email == current_iserv_email, 
+                                               current_jamf_locationId == current_iserv_locationId, 
+                                               current_jamf_username == current_iserv_username,
+                                               current_jamf_firstName == current_iserv_firstName, 
+                                               current_jamf_lastName == current_iserv_lastName],
+                              '\n\nJamf:\t'+current_jamf_email,len(current_jamf_email), '\nIServ:\t'+current_iserv_email,len(current_iserv_email),
+                              '\n\nJamf:\t'+current_jamf_locationId,len(current_jamf_locationId), '\nIServ:\t'+current_iserv_locationId,len(current_iserv_locationId),
+                              '\n\nJamf:\t'+current_jamf_username,len(current_jamf_username), '\nIServ:\t'+current_iserv_username,len(current_iserv_username),
+                              '\n\nJamf:\t'+current_jamf_firstName,len(current_jamf_firstName), '\nIServ:\t'+current_iserv_firstName,len(current_iserv_firstName), 
+                              '\n\nJamf:\t'+current_jamf_lastName,len(current_jamf_lastName),'\nIServ:\t'+current_iserv_lastName,len(current_iserv_lastName),'\n')
+                        url = self.endpoints['users'][0]+'/'+str(user_id)
+                        data = {
+                           "username": current_iserv_username, 
+                           "password": "",
+                           "email": current_iserv_email,
+                           "firstName": current_iserv_firstName,
+                           "lastName": current_iserv_lastName,
+                           "memberOf": [],
+                           "locationId": current_iserv_locationId
+                        }
+                        response = session.put(url, headers=self.headers, json=data, auth=(self.username, self.password))
+                        if response.status_code == 200:
+                            print('***'*35)
+                            print(f"{yellow}{user_id},{data['username']} reviewed and corrected - Progress {counter+1} of {len(iserv_jamf_users)}"+color_end)
+                            print('***'*35)
+                        else:
+                            print(f"Error reviewing user {user_id},{data['username']}: {response.status_code} - {response.text}")
+            input(sorted(add_users))
         elif ids != None:
             red = '\033[0;31m'
             yellow = '\033[1;33m'
@@ -272,16 +276,14 @@ class Jamfapi:
         red_end = '\033[0m'
         os.system('clear')
         iserv_jamf_users = self.__get_iserv_data(data='jamf_users')
-        jamf_users = self.__get_jamf_data('users').reset_index(drop=True).sort_values(by='id') #.drop(columns='id')
+        jamf_users = self.__get_jamf_data('users').reset_index(drop=True).sort_values(by='id')
         iserv_users = self.__get_iserv_data(data='all')
         iserv_users['username'] = iserv_users['email']
         iserv_users = iserv_users[['username', 'firstname', 'lastname', 'email', 'user_id']].drop_duplicates()
         if jamf_users.empty:
-            print("\033[31mNo User data in jamf!\033[0m")
-            return None
+            raise ValueError("\033[31mNo users in Jamf!\033[0m") 
         elif iserv_jamf_users.empty:
-            print("\033[31mNo User data in local database!\033[0m")
-            return None
+            raise ValueError("\033[31mNo User data in local database!\033[0m")
         else:
             print('Continue with reviewing user data in 3 seconds...')
             sleep(3)
@@ -293,12 +295,12 @@ class Jamfapi:
             excluded_ids = [str(iserv_jamf_users.loc[iserv_jamf_users['id']==i]['id'].values[0]) for i in db_ids_not_in_jamf]
             create_ids = [id for id in excluded_ids]
             delete_ids = [str(jamf_users.loc[jamf_users['id']==i]['id'].values[0]) for i in new_ids_in_jamf]
-            excluded_ids = create_ids + delete_ids #excluded_ids + [str(jamf_users.loc[jamf_users['id']==i]['id'].values[0]) for i in new_ids_in_jamf]
-#            print('Create:', create_ids, '\nDelete:',delete_ids)
+            excluded_ids = create_ids + delete_ids
             self.sync_user_by_ids(ids=excluded_ids)
-#            input('Stop 2')
-            return None
+            input('Stop 2')
             update_users_dict = {}
+            input(sorted(create_ids))
+#            add_users = [iserv_jamf_users
             if add_users != set():
                 iserv_users = iserv_users.loc[iserv_users['username'].isin(add_users)]
                 api_data = [{i[0]: [i[1], i[2], i[3]]} for x,i in iserv_users.iterrows()]
