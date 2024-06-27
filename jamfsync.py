@@ -3,6 +3,7 @@
 # -------------------------
 # Author: Ervin Kurbegovic
 
+import pdb
 from time import sleep
 from datetime import datetime
 import requests
@@ -46,6 +47,9 @@ class Jamfapi:
         self.username = username
         self.password = password
         self.api_url = api_url
+        self.red = '\033[0;31m'
+        self.yellow = '\033[1;33m' 
+        self.reset_color = '\033[0m' # reset color
         self.engine = create_engine('postgresql://postgres@:5432/iserv')
         self.headers = {
                         'User-Agent': 'curl/7.24.0',
@@ -84,13 +88,27 @@ class Jamfapi:
           sys.exit(ex)
 
     def connect_users_by_act(self):
+        """
+        Connects user data from two sources (IServ and Jamf|School) based on a
+        shared 'act/email' attribute and stores the merged information in a PostgreSQL database table.
+
+        This method assumes you have a valid SQLAlchemy engine object (`self.engine`) configured
+        to connect to your PostgreSQL database.
+
+        Raises:
+            errors.UndefinedTable: If the target table ('citeq_jamf_userstatus') doesn't exist.
+        """
         with self.engine.connect() as conn:
             conn.execute(text("DROP TABLE IF EXISTS citeq_jamf_userstatus"))
-        df_isv_users = self.__get_iserv_data(data='iserv_users')
-        df_jamf_users = self.__get_jamf_data('users') 
-        df_merged_users = df_isv_users.merge(df_jamf_users, left_on='email', right_on='email', how='left', suffixes=('_iserv', '_jamf'))
+        # Pulling user data from local database table: users
+        df_isv_users = self.__get_iserv_data(data='iserv_users') # all user data from iserv with no filter
+        # Pulling user data from jamf|School over the APIv1
+        jamf_users = self.__get_jamf_data('users') 
+        # Merging iserc user data and jamf|School user data over the e-mail
+        df_merged_users = df_isv_users.merge(jamf_users, left_on='email', right_on='email', how='left', suffixes=('_iserv', '_jamf'))
         df_merged_users = df_merged_users[['id_iserv','act', 'id_jamf','username','firstName', 'lastName', 'email', 'locationId']].drop_duplicates()
         df_merged_users['created_for'] = 'jamf_school_api_v1'
+        # Enriching data with source and timestamp information
         df_merged_users['last_sync'] = pd.Timestamp(datetime.now()).tz_localize('UTC').tz_convert('Europe/Berlin')
         df_merged_users = df_merged_users[['id_iserv','act', 'id_jamf','username','firstName','lastName', 'email', 'locationId','created_for','last_sync']].drop_duplicates()
         df_merged_users.columns = ['id_iserv', 'act', 'id_jamf','username_jamf','firstName_jamf','lastName_jamf','email','locationId_jamf', 'created_for','last_sync']
@@ -100,12 +118,15 @@ class Jamfapi:
             print(f"Error: {e}")
             print("The table 'citeq_jamf_userstatus' does not exist. Proceeding with creating table...")
             df_merged_users.to_sql('citeq_jamf_userstatus', self.engine, index=False, if_exists='replace')
-        return None
 
     def sync_user_by_ids(self, ids=None):
-        red = '\033[0;31m'
-        yellow = '\033[1;33m'
-        color_end = '\033[0m' # No Color
+        """
+        Synchronization of user data using jamf ids to correct errors and ensure data consistency.
+        This method assumes you have provided valid list of jamf user ids.
+
+        Raises:
+            errors.UndefinedTable: If the target table ('citeq_jamf_userstatus') doesn't exist.
+        """
         session = requests.Session()
         iserv_users = self.__get_iserv_data(data='all')
         jamf_users = self.__get_jamf_data('users').reset_index(drop=True).sort_values(by='id')            
@@ -162,15 +183,12 @@ class Jamfapi:
                         response = session.put(url, headers=self.headers, json=data, auth=(self.username, self.password))
                         if response.status_code == 200:
                             print('***'*35)
-                            print(f"{yellow}{user_id},{data['username']} reviewed and corrected - Progress {counter+1} of {len(iserv_jamf_users)}"+color_end)
+                            print(f"{self.yellow}{user_id},{data['username']} reviewed and corrected - Progress {counter+1} of {len(iserv_jamf_users)}"+self.reset_color)
                             print('***'*35)
                         else:
                             print(f"Error reviewing user {user_id},{data['username']}: {response.status_code} - {response.text}")
             input(sorted(add_users))
         elif ids != None:
-            red = '\033[0;31m'
-            yellow = '\033[1;33m'
-            color_end = '\033[0m' # No Color
             session = requests.Session()
             iserv_users = self.__get_iserv_data(data='all')
             iserv_jamf_users = self.__get_iserv_data(data='jamf_userstatus')
@@ -210,7 +228,7 @@ class Jamfapi:
                     iserv_jamf_users = iserv_jamf_users.loc[iserv_jamf_users['id_iserv']==user_id][selected_columns].drop_duplicates()
                     iserv_jamf_users.loc[iserv_jamf_users['id_iserv']==user_id, 'last_sync'] = pd.Timestamp(datetime.now()).tz_localize('UTC').tz_convert('Europe/Berlin')
                     dfs_corrected.append(iserv_jamf_users.loc[iserv_jamf_users['id_iserv']==user_id])
-                    print(yellow,'Corrected: ', iserv_jamf_users.loc[iserv_jamf_users['id_iserv']==user_id], color_end)
+                    print(self.yellow,'Corrected: ', iserv_jamf_users.loc[iserv_jamf_users['id_iserv']==user_id], self.reset_color)
             input('finished loop')
             # Drop the table if it exists
             with self.engine.connect() as conn:
@@ -262,7 +280,7 @@ class Jamfapi:
                     response = session.put(url, headers=self.headers, json=data, auth=(self.username, self.password))
                     if response.status_code == 200:
                         print('***'*35)
-                        print(f"{yellow}{user_id},{data['username']} reviewed and corrected - Progress {counter+1} of {len(review_users)}"+color_end)
+                        print(f"{self.yellow}{user_id},{data['username']} reviewed and corrected - Progress {counter+1} of {len(review_users)}"+self.reset_color)
                         print('***'*35)
                     else:
                         print(f"Error reviewing user {user_id},{data['username']}: {response.status_code} - {response.text}")
@@ -272,18 +290,22 @@ class Jamfapi:
             input()
 
     def review_users(self, location='LABOR Citeq'):
-        red = '\033[31m'
-        red_end = '\033[0m'
         os.system('clear')
-        iserv_jamf_users = self.__get_iserv_data(data='jamf_users')
-        jamf_users = self.__get_jamf_data('users').reset_index(drop=True).sort_values(by='id')
-        iserv_users = self.__get_iserv_data(data='all')
+        # Pulling data from the local database
+        iserv_jamf_users = self.__get_iserv_data(data='citeq_jamf_users') # initial user data from jamf|School (first synchronization)
+        # Pulling data from jamf|School over the APIv1
+        jamf_users = self.__get_jamf_data('users').reset_index(drop=True).sort_values(by='id') # current user data from jamf|School
+        # Pulling data from the local database table members, groups and users
+        iserv_users = self.__get_iserv_data(data='all') # iserv user data with filter on firstname != ""
+        # Pulling data from local database
+        # Note: This user data can only be synchronized via the username. Subsequent changes are not traceable!
         iserv_users['username'] = iserv_users['email']
         iserv_users = iserv_users[['username', 'firstname', 'lastname', 'email', 'user_id']].drop_duplicates()
         if jamf_users.empty:
             raise ValueError("\033[31mNo users in Jamf!\033[0m") 
         elif iserv_jamf_users.empty:
             raise ValueError("\033[31mNo User data in local database!\033[0m")
+            # Calling the initial synch and storing jamf|School data in the local database
         else:
             print('Continue with reviewing user data in 3 seconds...')
             sleep(3)
@@ -300,7 +322,7 @@ class Jamfapi:
             input('Stop 2')
             update_users_dict = {}
             input(sorted(create_ids))
-#            add_users = [iserv_jamf_users
+            input(iserv_users)
             if add_users != set():
                 iserv_users = iserv_users.loc[iserv_users['username'].isin(add_users)]
                 api_data = [{i[0]: [i[1], i[2], i[3]]} for x,i in iserv_users.iterrows()]
@@ -338,10 +360,10 @@ class Jamfapi:
             input(['DEL', len(update_users_dict['delete']), update_users_dict['delete']])
         for index1, user1 in iserv_jamf_users.iterrows():
             if user1['username'] not in jamf_users['username'].to_list():
-                print('User just in IServ:', red, user1['username'], user1['id'],red_end)
+                print('User just in IServ:', self.red, user1['username'], user1['id'],self.reset_color)
         for index1, user1 in jamf_users.iterrows():
             if user1['username'] not in iserv_jamf_users['username'].to_list():
-                print('User just in Jamf: ', red, user1['email'], user1['id'], red_end)
+                print('User just in Jamf: ', self.red, user1['email'], user1['id'], self.reset_color)
         input()
 
     def update_classes(self, class_template=None, location='LABOR Citeq'):
@@ -528,6 +550,10 @@ class Jamfapi:
     def delete_classes(self, location='all', only_iserv_classes=True):
         print('Starting the Deletion of Classes')
         df_classes = self.classes
+        if df_classes.empty:
+            self.delete_classes()
+            api_data = self.create_class_template(initial_sync=True)
+            self.create_classes(api_data)
         if location == 'all':
             df_classes = df_classes.loc[(df_classes['locationId'] >= 0)]
         else:
@@ -841,9 +867,9 @@ class Jamfapi:
                                             isv_type = 'jamfsync' and 
                                             deleted_grp is null or
                                             group_isv = '{teacher_group}' order by group_isv;''', self.engine) 
-            elif data == 'jamf_users':
+            elif data == 'citeq_jamf_users':
                 return pd.read_sql(f'''select * from citeq_jamf_users;''', self.engine).reset_index(drop=True).sort_values(by='id')
-            elif data == 'jamf_userstatus':
+            elif data == 'citeq_jamf_userstatus':
                 return pd.read_sql(f'''select * from citeq_jamf_userstatus;''', self.engine).reset_index(drop=True).sort_values(by='id_iserv')
 
             elif data == 'iserv_users':
@@ -861,6 +887,7 @@ class Jamfapi:
         headers = {'X-Server-Protocol-Version':'3'}
         try:
             response = requests.get(endpoint, auth=(username, password), headers=headers)
+            pdb.set_trace()
         except BaseException as ex:
             sys.exit(ex)
         try:

@@ -150,7 +150,7 @@ def main():
                         if len(api_data['add']) > 0:
                             fresh_user_keys = [item.keys() for item in api_data['add']]
                             all_keys = [key for sublist in fresh_user_keys for key in sublist]
-                            fresh = jamf.review_users(fresh_users = all_keys)
+                            fresh = jamf.review_users()
                             jamf.update_users(user_template=api_data, location=location_name, fresh_users=fresh)
                     elif len(api_data['delete']) > 0:
                         jamf.update_users(user_template=api_data, location=location_name)
