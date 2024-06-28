@@ -16,7 +16,7 @@ By default, the group "lehrkraefte" is used to identify teachers on the IServ sy
 An alternative option is to use a role, such as "ROLE_TEACHER," to distinguish between teachers and students.
 Future updates will include enhanced customization options, allowing administrators to set specific group characteristics for synchronization.
 
-Benefits:
+### Benefits:
 
 Streamlined Data Management: Automate the transfer and synchronization of user and group data between IServ and Jamf|School, reducing manual effort and minimizing errors.
 
@@ -26,7 +26,8 @@ Flexibility and Customization: Adapt the synchronization process to meet the uni
 
 Future Developments: This project is under active development, with plans to expand its functionality and customization options.
 
-#### Sketch: APIv1 Communiation - IServ & Jamf|School
+
+### Sketch: APIv1 Communiation - IServ & Jamf|School
 <hr style="border-color: orange;">
 
 ```mermaid
