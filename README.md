@@ -36,7 +36,7 @@ Jamf|School ->> IServ: "code":200,"count":360,"users":[dict,dict,...]
 #### Modeling: Basic classes
 <hr style="border-color: orange;">
 
-:::mermaid
+```mermaid
 classDiagram
     class JamfAPI{
       +String username
@@ -46,7 +46,7 @@ classDiagram
       +get_jamf_data(endpoint) DataFrame
       +sync_jamf_data(endpoint) Dict
     }
-:::
+```
 If the method `get_jamf_data` is used and no endpoint is specified, all available data is retrieved from the Jamf|School APIv1 and stored in accessible variables. Note that if an endpoint is specified, such as users, only the specified user's data will be returned in the custom variable.
 
 Accessible data, i.e. class variables in JamfAPI are: 
@@ -73,7 +73,7 @@ Accessible data, i.e. class variables in JamfAPI are:
     # returns only one pandas DataFrame with the current jamf endpoint data
     jamf.custom 
 
-:::mermaid
+```mermaid
 classDiagram
     class FetchIServ{
       +String db_name
@@ -83,4 +83,4 @@ classDiagram
       +DataFrame target_data
       +__get_prep_users(teacher_group, teacher_role) json
     }
-:::
+```
