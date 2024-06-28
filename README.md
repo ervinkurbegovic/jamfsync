@@ -1,4 +1,5 @@
-# python-jamfsync (Coming soon! This project is under construction)
+# python-jamfsync 
+## (Coming soon! This project is under construction)
 
 Jamfsync is a Python 3 module for accessing the Jamf School APIv1. The APIv1 is the primary tool for accessing data on a Jamf|School system to enable integrations with other utilities or systems.
 The concept behind this is to have a class or simply a collection of data (variables) and methods (functions) that map directly to the API (https://example.jamfcloud.com/api/).
