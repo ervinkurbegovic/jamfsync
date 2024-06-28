@@ -12,7 +12,6 @@ The distinction is based on a group that uniquely identifies the teachers on the
 #### Sketch: APIv1 Communiation - IServ & Jamf|School
 <hr style="border-color: orange;">
 
-:::mermaid
 sequenceDiagram 
 participant IServ
 participant Jamf|School
@@ -31,7 +30,6 @@ Jamf|School ->> IServ: "code": 200, "message": "ClassDeleted"
 IServ --> Jamf|School:  :
 IServ ->> Jamf|School: GET/ data
 Jamf|School ->> IServ: "code":200,"count":360,"users":[dict,dict,...]
-:::
 
 #### Modeling: Basic classes
 <hr style="border-color: orange;">
