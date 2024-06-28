@@ -26,7 +26,7 @@ Flexibility and Customization: Adapt the synchronization process to meet the uni
 
 Future Developments: This project is under active development, with plans to expand its functionality and customization options.
 
-### Sketch: APIv1 Communiation - IServ & Jamf|School
+### Sketch: APIv1 Communiation
 
 ```mermaid
 sequenceDiagram 
