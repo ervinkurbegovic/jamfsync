@@ -21,6 +21,7 @@ Benefits:
 Streamlined Data Management: Automate the transfer and synchronization of user and group data between IServ and Jamf|School, reducing manual effort and minimizing errors.
 
 Enhanced Acceptance: Maintain a single point of management on IServ, allowing teachers to automatically receive the classes they teach and seamlessly manage their students' iPads without needing to be aware of the Jamf|School system.
+
 Flexibility and Customization: Adapt the synchronization process to meet the unique needs of your school. Feel free to contact me with any requirements or suggestions to tailor the project to your specific needs. I will respond promptly, at least in the form of a comment.
 
 Future Developments: This project is under active development, with plans to expand its functionality and customization options.
