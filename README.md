@@ -26,9 +26,7 @@ Flexibility and Customization: Adapt the synchronization process to meet the uni
 
 Future Developments: This project is under active development, with plans to expand its functionality and customization options.
 
-***
 ### Sketch: APIv1 Communiation - IServ & Jamf|School
-<hr style="border-color: orange;">
 
 ```mermaid
 sequenceDiagram 
@@ -51,8 +49,7 @@ IServ ->> Jamf|School: GET/ data
 Jamf|School ->> IServ: "code":200,"count":360,"users":[dict,dict,...]
 ```
 
-#### Modeling: Basic classes
-<hr style="border-color: orange;">
+### Modeling: Basic classes
 
 ```mermaid
 classDiagram
