@@ -4,7 +4,7 @@
 Jamfsync is a Python 3 module for accessing the Jamf School APIv1. The APIv1 is the primary tool for accessing data on a Jamf|School system to enable integrations with other utilities or systems.
 The concept behind this is to have a class or simply a collection of data (variables) and methods (functions) that map directly to the API (https://example.jamfcloud.com/api/).
 
-The Jamfapi class connects to the Jamf|School APIv1 and retrieves data in the form of pandas DataFrames. In addition, all IServ users and certain IServ groups can be synced. The IServ groups are turned into classes on jamf|School. However, not all groups are synced as classes, but only those with the group characteristic ****, which can be set on the IServ.
+The JamfAPI class connects to the Jamf|School APIv1 and retrieves data in the form of pandas DataFrames. In addition, all IServ users and certain IServ groups can be synced. The IServ groups are turned into classes on jamf|School. However, not all groups are synced as classes, but only those with the group characteristic ****, which can be set on the IServ.
 
 The primary goal of the class is to transfer the user and group data from the school server IServ to the jamf School cloud and also to create classes in Jamf School, whereby a distinction is made between students and teachers.
 The distinction is based on a group that uniquely identifies the teachers on the IServ. The default group is "lehrkreafte", which can be modified. If the group is not sufficient, you can also use a role such as "ROLE_TEACHER" to separate teachers and students.
