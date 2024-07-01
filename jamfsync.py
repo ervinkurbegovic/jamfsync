@@ -887,7 +887,6 @@ class Jamfapi:
         headers = {'X-Server-Protocol-Version':'3'}
         try:
             response = requests.get(endpoint, auth=(username, password), headers=headers)
-            pdb.set_trace()
         except BaseException as ex:
             sys.exit(ex)
         try:
