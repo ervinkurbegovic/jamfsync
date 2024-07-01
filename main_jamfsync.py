@@ -18,20 +18,19 @@ import string, random
 import sys
 import os
 import traceback
-from dotenv import load_dotenv
-from jamfsync import Jamfapi
-load_dotenv(override=True)
+from jamfsync import JamfAPI
 
 def main():
-    # Laden der geschützten Globalenvariablen, um Benutzernamen und Passwörter nicht in Klartext zu verwenden
+    # Load secure global variables to avoid using usernames and passwords in plain text
     apiuser = os.getenv('APIUSERNAME2')
     apipwd = os.getenv('APIPASSWORD2')
     api_url = "https://laborciteqms.jamfcloud.com/api/"
     pruef = True
     while pruef:
         os.system('clear')
-        jamf = Jamfapi(username=apiuser, password=apipwd, api_url=api_url, endpoint=None) #If the endpoint is set to None, all endpoints are queried
+        jamf = JamfAPI(username=apiuser, password=apipwd, api_url=api_url, endpoint='all') #If the endpoint is set to None, all endpoints are queried
         engine = create_engine('postgresql://postgres@:5432/iserv')
+        jamf.sync_jamf_data('users', 'LABOR Citeq')
         red = '\033[31m'
         red_end = '\033[0m'
         pruef = True
