@@ -58,8 +58,9 @@ classDiagram
       +String password
       +String api_url
       +String endpoint
-      +get_jamf_data(endpoint) DataFrame
-      +sync_jamf_data(endpoint) Dict
+      +get_jamf_data(String endpoint, String location) DataFrame
+      +sync_jamf_data(String endpoint, String location) dict
+      -create_classes(dict class_template, String suffix, String praefix) dict
     }
 ```
 If the method `get_jamf_data` is used and no endpoint is specified, all available data is retrieved from the Jamf|School APIv1 and stored in accessible variables. Note that if an endpoint is specified, such as users, only the specified user's data will be returned in the custom variable.
